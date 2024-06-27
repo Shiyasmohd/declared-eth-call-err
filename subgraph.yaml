@@ -1,0 +1,64 @@
+specVersion: 1.2.0
+description: NFT subgraph for fuse
+repository: https://github.com/fuseio/fuse-nft-subgraph
+schema:
+  file: ./schema.graphql
+indexerHints:
+  prune: auto
+dataSources:
+  - kind: ethereum/contract
+    name: Erc721
+    network: fuse
+    source:
+      abi: Erc721
+      startBlock: 14533953
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Collectible
+      abis:
+        - name: Erc721
+          file: ./abis/Erc721.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+          calls:
+            Erc721.name: Erc721[event.address].name()
+            Erc721.symbol: Erc721[event.address].symbol()
+      file: ./src/template-mapping.ts
+templates:
+  - kind: ethereum/contract
+    name: ERC721
+    network: fuse
+    source:
+      abi: Erc721
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Collectible
+      abis:
+        - name: Erc721
+          file: ./abis/Erc721.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+          calls:
+            Erc721.tokenURI: Erc721[event.address].tokenURI(event.params.tokenId)
+      file: ./src/mapping.ts
+  - kind: file/ipfs
+    name: IpfsContent
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - IpfsMetadata
+      abis:
+        - name: Erc721
+          file: ./abis/Erc721.json
+      handler: handleTokenMetadata
+      file: ./src/fds.ts

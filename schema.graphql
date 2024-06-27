@@ -1,0 +1,38 @@
+type Account @entity {
+  id: Bytes!
+  address: Bytes!
+  collectibles: [Collectible!] @derivedFrom(field: "owner")
+}
+
+type Collectible @entity {
+  id: Bytes!
+  tokenId: BigInt!
+  creator: Account!
+  owner: Account!
+  collection: Collection!
+  contentURI: String!
+  ipfsHashURI: String
+  revealed: Boolean!
+
+  #Timestamps
+  modified: BigInt
+  created: BigInt
+  removed: BigInt
+
+  metadata: IpfsMetadata
+}
+
+type Collection @entity {
+  id: Bytes!
+  collectionName: String!
+  collectionSymbol: String!
+  collectionAddress: Bytes!
+  collectibles: [Collectible!] @derivedFrom(field: "collection")
+}
+
+type IpfsMetadata @entity {
+  id: ID!
+  name: String!
+  description: String!
+  imageURL: String!
+}
